@@ -135,7 +135,7 @@ namespace :mastodon do
       prompt.say "\n"
 
       if prompt.yes?('Do you want to store uploaded files on the cloud?', default: false)
-        case prompt.select('Provider', ['Amazon S3', 'Wasabi', 'Minio', 'Google Cloud Storage'])
+        case prompt.select('Provider', ['Amazon S3', 'Wasabi', 'Minio', 'Google Cloud Storage', 'DreamObjects'])
         when 'Amazon S3'
           env['S3_ENABLED']  = 'true'
           env['S3_PROTOCOL'] = 'https'
@@ -242,6 +242,28 @@ namespace :mastodon do
           end
 
           env['AWS_SECRET_ACCESS_KEY'] = prompt.ask('GCS secret key:') do |q|
+            q.required true
+            q.modify :strip
+          end
+        when 'DreamObjects'
+          env['S3_ENABLED']             = 'true'
+          env['S3_PROTOCOL']            = 'https'
+          env['S3_HOSTNAME']            = 'objects-us-east-1.dream.io'
+          env['S3_ENDPOINT']            = 'https://objects-us-east-1.dream.io'
+          env['S3_REGION']              = 'us-east-1'
+
+          env['S3_BUCKET'] = prompt.ask('DreamObjects bucket name:') do |q|
+            q.required true
+            q.default "files.#{env['LOCAL_DOMAIN']}"
+            q.modify :strip
+          end
+
+          env['AWS_ACCESS_KEY_ID'] = prompt.ask('Access Key:') do |q|
+            q.required true
+            q.modify :strip
+          end
+
+          env['AWS_SECRET_ACCESS_KEY'] = prompt.ask('Secret Key:') do |q|
             q.required true
             q.modify :strip
           end
